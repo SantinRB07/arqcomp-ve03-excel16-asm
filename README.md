@@ -93,9 +93,3 @@ python tools\compileExcelASM16.py src\ex2.s build\ROM-ex2.xlsx
 
 - **CPU Excel-16:** https://github.com/InkboxSoftware/excelCPU
 - **Simulador MIPS (validação do ex1):** https://shawnzhong.github.io/JsSpim/
-
-## Licença
-
-O toolchain em `tools/` é redistribuído sob a licença original (ver
-[tools/LICENSE](tools/LICENSE)). O código em `src/` e a documentação são de
-autoria do aluno.
