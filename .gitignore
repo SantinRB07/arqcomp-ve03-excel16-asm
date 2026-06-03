@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Excel temp/lock files
+~$*.xlsx
+~$*.xls
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+.claude/
+*.swp
+*.swo
+
+# Build intermediário (manter os ROM-ex*.xlsx finais)
+*.bak
