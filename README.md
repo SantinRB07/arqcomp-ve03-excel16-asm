@@ -9,65 +9,107 @@ em planilha Excel — projeto [InkboxSoftware/excelCPU](https://github.com/Inkbo
 2. **Exemplo 2** — Conversão de pixels RGB para escala de cinza (origem: C)
 
 > Aluno: Lucas Santiago
-> Entrega: 11/05/2026
 
 ## Estrutura do repositório
 
 ```
 VE03/
+├── README.md
+├── .gitignore
 ├── src/                Código-fonte (originais + traduções Excel-16 ASM)
 │   ├── ex1.asm           MIPS original (referência)
 │   ├── ex1.s             Tradução Excel-16 ASM
 │   ├── ex2.c             C original (referência)
 │   └── ex2.s             Tradução Excel-16 ASM
-├── build/              ROMs compiladas
+├── build/              ROMs compiladas (entregáveis)
 │   ├── ROM-ex1.xlsx
 │   └── ROM-ex2.xlsx
 ├── tools/              Toolchain Excel-16 (cópia do upstream)
-│   ├── compileExcelASM16.py
-│   ├── CPU.xlsx
-│   ├── ROM.xlsx              Template vazio
+│   ├── compileExcelASM16.py    Compilador Excel-ASM16
+│   ├── CPU.xlsx                Simulador da CPU
+│   ├── ROM.xlsx               ROM de trabalho (lida pela CPU)
 │   ├── instructionSet.xlsx
 │   ├── Excel-ASM16.xml
-│   └── LICENSE
-├── docs/               Relatório descritivo
-│   └── Relatorio-VE03.pdf
-└── media/              Vídeos das simulações
+│   ├── run-clock.ps1          Script p/ automatizar os ciclos de clock (F9)
+│   ├── LICENSE
+│   └── samples/               Programas de exemplo do upstream
+├── docs/               Documentação e relatório
+│   ├── excel-asm16-ref.md      Referência da linguagem (ISA, sintaxe, I/O)
+│   ├── ex1-modo-manual.md      Entrada do usuário via modo manual (ex1)
+│   ├── roteiro-video-ex1.md    Roteiro de gravação do ex1
+│   ├── roteiro-video-ex2.md    Roteiro de gravação do ex2
+│   └── Relatorio-VE03.pdf      Relatório descritivo (entregável)
+└── media/              Vídeos das simulações (entregáveis)
     ├── ex1-simulacao.mp4
     └── ex2-simulacao.mp4
 ```
 
 ## Pré-requisitos
 
-- Python 3.x com a biblioteca `openpyxl`
-  ```sh
+- **Python 3.x** com a biblioteca `openpyxl` (para o compilador):
+  ```powershell
   pip install openpyxl
   ```
-- Microsoft Excel (para abrir `CPU.xlsx` e simular a execução)
+- **Microsoft Excel** com **cálculo iterativo habilitado**:
+  Arquivo → Opções → Fórmulas → marcar *"Habilitar cálculo iterativo"* e
+  definir *"Iterações máximas"* = **1**. (A CPU usa fórmulas circulares no clock;
+  sem isso ela não funciona.)
 
-## Como compilar e executar
+## Como compilar
 
-A partir da raiz do projeto:
+A partir da raiz do projeto (PowerShell):
 
-```sh
-# 1. Copiar template ROM para build/
-cp tools/ROM.xlsx build/ROM-ex1.xlsx
+```powershell
+# Compila o ex1 (cada programa gera sua própria ROM)
+python tools\compileExcelASM16.py src\ex1.s build\ROM-ex1.xlsx
 
-# 2. Compilar o assembly Excel-16
-python tools/compileExcelASM16.py src/ex1.s build/ROM-ex1.xlsx
-
-# 3. Abrir CPU.xlsx no Excel e importar a ROM gerada (seguir instruções
-#    do README upstream do excelCPU)
+# Compila o ex2
+python tools\compileExcelASM16.py src\ex2.s build\ROM-ex2.xlsx
 ```
 
-Repetir o processo trocando `ex1` por `ex2`.
+## Como executar no simulador
+
+1. Coloque a ROM desejada como a ROM de trabalho:
+   ```powershell
+   Copy-Item build\ROM-ex1.xlsx tools\ROM.xlsx -Force
+   ```
+2. Abra **`tools\ROM.xlsx`** primeiro, depois **`tools\CPU.xlsx`**
+   (clique *"Atualizar"* se o Excel perguntar sobre os vínculos).
+3. **READ ROM**: na CPU, célula `S2` = `1`, F9 (espere "Ready"), `S2` = `0`, F9.
+   (copia a ROM para a RAM da CPU)
+4. **RESET PC**: célula `F2` = `1`, F9, `F2` = `0`, F9.
+5. Execute o clock: aperte **F9** várias vezes, ou use o script:
+   ```powershell
+   .\tools\run-clock.ps1 -Count 40     # ex1
+   .\tools\run-clock.ps1 -Count 400    # ex2 (mais longo)
+   ```
+
+> ⚠ **Entrada de dados**: edite os valores na **`ROM.xlsx`** (nunca nas células
+> de RAM da `CPU.xlsx`, que contêm fórmulas). Veja os detalhes e o mapa de
+> células em [docs/excel-asm16-ref.md](docs/excel-asm16-ref.md).
+
+### Onde ver os resultados (na CPU.xlsx)
+
+- **ex1**: célula `E140` = área do retângulo (`$0004`).
+- **ex2**: células `A141`–`G141` = os 7 valores de cinza (`$0100`–`$0106`);
+  mesmos valores no display em `A380`–`G380` (`$F000`+).
+
+## Documentação
+
+- [docs/excel-asm16-ref.md](docs/excel-asm16-ref.md) — referência completa da
+  linguagem Excel-ASM16 (instruction set, sintaxe, I/O e pegadinhas do simulador).
+- [docs/ex1-modo-manual.md](docs/ex1-modo-manual.md) — como inserir os dados via
+  modo manual da CPU (alternativa à edição da ROM).
+- [docs/roteiro-video-ex1.md](docs/roteiro-video-ex1.md) e
+  [docs/roteiro-video-ex2.md](docs/roteiro-video-ex2.md) — roteiros das gravações.
 
 ## Referências
 
 - **CPU Excel-16:** https://github.com/InkboxSoftware/excelCPU
-- **Simulador MIPS (validação ex1):** https://shawnzhong.github.io/JsSpim/
+- **Simulador MIPS (validação do ex1):** https://shawnzhong.github.io/JsSpim/
 
 ## Licença
 
-O toolchain em `tools/` é redistribuído sob a licença original (ver `tools/LICENSE`).
-O código em `src/` e a documentação são de autoria do aluno.
+O toolchain em `tools/` é redistribuído sob a licença original (ver
+[tools/LICENSE](tools/LICENSE)). O código em `src/` e a documentação são de
+autoria do aluno.

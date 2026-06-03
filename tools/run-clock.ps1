@@ -1,21 +1,13 @@
-# run-clock.ps1
-# Envia teclas F9 automaticamente para o Excel, simulando ciclos de clock
-# da CPU Excel-16. Util para evitar apertar F9 manualmente N vezes.
+# Manda F9 pro Excel varias vezes seguidas, pra nao ter que ficar apertando na
+# mao. Cada F9 e um ciclo de clock da CPU.
 #
-# USO:
-#   .\run-clock.ps1                       # padrao: 50 F9, 1500ms entre eles
-#   .\run-clock.ps1 -Count 100            # 100 ciclos
-#   .\run-clock.ps1 -Count 30 -DelayMs 2000  # 30 ciclos, 2s entre eles
+# Uso:
+#   .\run-clock.ps1              -> 50 vezes
+#   .\run-clock.ps1 -Count 400   -> 400 vezes (pro ex2, que e mais longo)
 #
-# COMO USAR:
-#   1. Abra o CPU.xlsx no Excel e prepare a simulacao (READ ROM, RESET PC)
-#   2. Deixe a janela do Excel em foco
-#   3. Rode o script no PowerShell
-#   4. Em 3 segundos, alterne para o Excel (Alt+Tab) - depois disso o
-#      script envia F9 automaticamente.
-#
-# AVISO: nao mexa em outras janelas durante o envio - as teclas vao
-# para o app que estiver em foco.
+# Antes de rodar: deixe o Excel ja preparado (READ ROM e RESET feitos). Depois
+# de executar, tem 3 segundos pra clicar na janela do Excel. Nao mexa em outra
+# janela enquanto roda, senao o F9 vai pro lugar errado. Ctrl+C cancela.
 
 param(
     [int]$Count = 50,
@@ -26,25 +18,19 @@ param(
 Add-Type -AssemblyName System.Windows.Forms
 
 Write-Host ""
-Write-Host "==> Vou enviar $Count F9 com $DelayMs ms entre eles." -ForegroundColor Cyan
-Write-Host "==> Voce tem $StartDelaySec segundos para alternar para o Excel (Alt+Tab)." -ForegroundColor Yellow
-Write-Host "==> Para abortar a qualquer momento: Ctrl+C neste terminal." -ForegroundColor Yellow
-Write-Host ""
+Write-Host "Vou apertar F9 $Count vezes (intervalo de $DelayMs ms)." -ForegroundColor Cyan
+Write-Host "Clique na janela do Excel agora..." -ForegroundColor Yellow
 
-# Contagem regressiva
 for ($i = $StartDelaySec; $i -gt 0; $i--) {
     Write-Host "  $i..." -NoNewline
     Start-Sleep -Seconds 1
 }
-Write-Host " GO!" -ForegroundColor Green
-Write-Host ""
+Write-Host " ja!" -ForegroundColor Green
 
-# Envia F9 N vezes
 for ($i = 1; $i -le $Count; $i++) {
     [System.Windows.Forms.SendKeys]::SendWait('{F9}')
-    Write-Host ("  F9 [{0,3}/{1}]" -f $i, $Count)
+    Write-Host ("  F9 {0}/{1}" -f $i, $Count)
     Start-Sleep -Milliseconds $DelayMs
 }
 
-Write-Host ""
-Write-Host "==> Pronto. $Count ciclos enviados." -ForegroundColor Green
+Write-Host "Pronto." -ForegroundColor Green

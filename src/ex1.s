@@ -1,63 +1,37 @@
-;==============================================================================
-; VE03 - EXEMPLO 1: Area de um retangulo
-; Traducao do programa MIPS (ex1.asm) para Excel-ASM16.
+; VE03 - Exemplo 1: area de um retangulo
+; Traducao do ex1.asm (MIPS) para Excel-ASM16.
 ;
-; ALGORITMO ORIGINAL (em MIPS):
-;   1. Le a largura (width) da entrada padrao
-;   2. Le a altura (height) da entrada padrao
-;   3. Calcula area = width * height
-;   4. Imprime "Rectangle's area is <area>"
-;
-; ADAPTACOES PARA A CPU EXCEL-16:
-;   - A Excel-16 nao tem mecanismo de I/O em runtime (sem stdin/stdout/teclado).
-;     Como a CPU eh uma planilha, a "entrada do usuario" eh feita editando as
-;     celulas de RAM em CPU.xlsx ANTES de iniciar a simulacao; a "saida" eh
-;     observada lendo a celula correspondente apos a execucao.
-;   - As mensagens de prompt foram omitidas (sem saida textual no Excel-16).
-;   - A multiplicacao usa a instrucao MULT em hardware (16x16 -> 32 bits),
-;     diferente do MIPS que usa "mult" + "mflo".
-;
-; LAYOUT DE MEMORIA (apos a injecao automatica do JMP de .CODE):
-;   $0000-$0001  JMP automatico que pula a area de dados
-;   $0002        WIDTH   - largura  (entrada do usuario)
-;   $0003        HEIGHT  - altura   (entrada do usuario)
-;   $0004        AREA    - area, low16  (saida)
-;   $0005        AREAHI  - area, high16 (saida; bits altos do produto 32-bit)
-;   $0006...     codigo do programa
-;
-; COMO USAR:
-;   1. Compilar:    py compileExcelASM16.py ex1.s ROM-ex1.xlsx
-;   2. Abrir CPU.xlsx, importar a ROM, e editar as celulas $0002 (width) e
-;      $0003 (height) com os valores desejados.
-;   3. Rodar a simulacao. O resultado fica em $0004 (low16) e $0005 (high16).
-;==============================================================================
+; No MIPS o programa le largura e altura do teclado (syscall 5), multiplica e
+; imprime a area. A Excel-16 nao tem teclado nem saida de texto, entao adaptei:
+;   - largura e altura vem da ROM (edito os valores antes de rodar)
+;   - o resultado fica gravado na memoria, em $0004
+;   - tirei os prints de texto (nao tem como imprimir string aqui)
+; A multiplicacao usa MULT, que ja devolve o produto de 32 bits em dois
+; registradores - no MIPS tinha que usar mult + mflo.
 
 .DATA
-WIDTH = #0   ; entrada: largura (usuario edita em CPU.xlsx, endereco $0002)
-HEIGHT = #0  ; entrada: altura  (usuario edita em CPU.xlsx, endereco $0003)
-AREA = #0    ; saida: area low16  (endereco $0004)
-AREAHI = #0  ; saida: area high16 (endereco $0005)
+WIDTH = #0     ; $0002 - entrada (edito na ROM antes de rodar)
+HEIGHT = #0    ; $0003 - entrada
+AREA = #0      ; $0004 - saida (parte baixa)
+AREAHI = #0    ; $0005 - saida (parte alta, se passar de 65535)
 
 .CODE
+LOAD R1 WIDTH
+LOAD R2 HEIGHT
 
-;--- Carrega largura e altura da memoria ---
-LOAD R1 WIDTH    ; R1 <- MEM[WIDTH]
-LOAD R2 HEIGHT   ; R2 <- MEM[HEIGHT]
+; area = largura * altura
+CLC              ; zera o carry antes (ADD/MULT levam o carry em conta)
+MULT R1 R2       ; R1 = parte baixa, R2 = parte alta (R2 e sobrescrito)
 
-;--- Calcula area = width * height ---
-; MULT Ra Rb : produto 32-bit. Ra recebe os 16 bits baixos e Rb recebe os
-; 16 bits altos (Rb eh SOBRESCRITO). CLC antes por precaucao.
-CLC              ; C <- 0
-MULT R1 R2       ; R1 = low16(WIDTH*HEIGHT); R2 = high16(WIDTH*HEIGHT)
+; grava o resultado na memoria.
+; uso R0 como ponteiro de proposito: testando, vi que carregar um endereco
+; com LOAD #imediato num registrador alto (R8-R15) e logo usar no STORE nao
+; funciona - o valor nao chega a tempo. com R0-R7 funciona normal.
+LOAD R0 #4
+STORE R1 R0      ; $0004 = area
+LOAD R0 #5
+STORE R2 R0      ; $0005 = parte alta
 
-;--- Grava o resultado de volta na memoria ---
-; STORE nao aceita nome de variavel diretamente: so aceita STORE Ra Rb
-; (Rb ponteiro) ou STORE Ra @hex (endereco absoluto). Como conhecemos o
-; layout de memoria, usamos enderecos absolutos.
-STORE R1 @0004   ; MEM[AREA]   <- low16
-STORE R2 @0005   ; MEM[AREAHI] <- high16
-
-;--- Fim do programa ---
-; A Excel-16 nao tem instrucao HALT. Convencao: loop infinito sobre si mesmo.
+; nao existe HALT, entao travo num loop pra terminar
 END:
 JMP END

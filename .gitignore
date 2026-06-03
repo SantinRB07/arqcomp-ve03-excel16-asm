@@ -24,3 +24,11 @@ desktop.ini
 
 # Build intermediário (manter os ROM-ex*.xlsx finais)
 *.bak
+
+# Gravações brutas de tela (manter só os vídeos editados em media/)
+* - Excel *.mp4
+/*.mp4
+/tools/*.mp4
+
+# Frames temporários de edição de vídeo
+tmp-frames/
