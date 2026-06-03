@@ -32,3 +32,12 @@ desktop.ini
 
 # Frames temporários de edição de vídeo
 tmp-frames/
+
+# LaTeX - arquivos auxiliares (manter só .tex e o .pdf final)
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk

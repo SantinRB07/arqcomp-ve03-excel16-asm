@@ -1,0 +1,593 @@
+\documentclass[12pt, a4paper]{article}
+
+% =================== Pacotes Base ===================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{setspace}
+
+% =================== Pacotes Específicos do Relatório ===================
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage[most]{tcolorbox}
+
+% --- Cores ---
+\definecolor{azul}{RGB}{26, 82, 118}
+\definecolor{azulclaro}{RGB}{234, 242, 248}
+\definecolor{cinza}{RGB}{30, 30, 30}
+\definecolor{verde}{RGB}{106, 153, 85}
+\definecolor{amarelo}{RGB}{220, 220, 170}
+\definecolor{preto}{RGB}{0,0,0}
+\definecolor{comentario}{RGB}{106, 153, 85}
+\definecolor{string}{RGB}{206, 145, 120}
+\definecolor{azulkw}{RGB}{86, 156, 214}
+
+% --- Estilo de código Excel-ASM16 ---
+\lstdefinestyle{asm}{
+  backgroundcolor=\color{cinza},
+  basicstyle=\ttfamily\small\color{white},
+  keywordstyle=\color{amarelo}\bfseries,
+  commentstyle=\color{comentario}\itshape,
+  stringstyle=\color{string},
+  breaklines=true,
+  frame=single,
+  framerule=0pt,
+  rulecolor=\color{cinza},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  tabsize=4,
+  showstringspaces=false,
+  morekeywords={LOAD, STORE, TRAN, INC, DEC, CMP, JLT, JEQ, JMP, JGE, ADD, SUB, AND, OR, XOR, NOT, NOP, CLC, STC, MULT, DIV, ROL, ROR, .CODE, .DATA, ORG},
+  morecomment=[l]{;},
+}
+
+% --- Estilo de código MIPS ---
+\lstdefinestyle{mips}{
+  backgroundcolor=\color{cinza},
+  basicstyle=\ttfamily\small\color{white},
+  keywordstyle=\color{amarelo}\bfseries,
+  commentstyle=\color{comentario}\itshape,
+  breaklines=true,
+  frame=single,
+  framerule=0pt,
+  rulecolor=\color{cinza},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  tabsize=4,
+  showstringspaces=false,
+  morekeywords={la, li, lw, sw, add, sub, addi, addiu, mult, mflo, blt, ble, bne, beq, jr, jal, move, syscall, ori, .data, .text, .word, .asciiz, .globl},
+  morecomment=[l]{\#},
+}
+
+% --- Estilo de código C ---
+\lstdefinestyle{c}{
+  backgroundcolor=\color{cinza},
+  basicstyle=\ttfamily\small\color{white},
+  keywordstyle=\color{azulkw}\bfseries,
+  commentstyle=\color{comentario}\itshape,
+  stringstyle=\color{string},
+  breaklines=true,
+  frame=single,
+  framerule=0pt,
+  rulecolor=\color{cinza},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  tabsize=4,
+  showstringspaces=false,
+  language=C,
+  morekeywords={int, while, return, void, char, for, if, else},
+}
+
+% --- Títulos das seções ---
+\titleformat{\section}{\Large\bfseries\color{preto}}{\thesection.}{0.5em}{}[\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{preto}}{\thesubsection.}{0.5em}{}
+
+% --- Cabeçalho e rodapé ---
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small\color{gray} Arquitetura de Computadores}
+\rhead{\small\color{gray} VE03 -- ExcelCPU}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% --- Caixa de destaque ---
+\tcbuselibrary{skins, breakable}
+\newtcolorbox{destaque}{
+  colback=azulclaro, colframe=azul,
+  leftrule=4pt, toprule=0pt, bottomrule=0pt, rightrule=0pt,
+  arc=2pt, outer arc=2pt, boxsep=4pt, left=6pt, right=6pt, top=6pt, bottom=6pt,
+}
+
+% --- Hyperlinks ---
+\hypersetup{colorlinks=true, linkcolor=azul, urlcolor=azul}
+
+% =================== Capa no padrão Institucional ===================
+\newcommand{\instituicaoA}{MINISTÉRIO DA DEFESA}
+\newcommand{\instituicaoB}{DEPARTAMENTO DE CIÊNCIA E TECNOLOGIA}
+\newcommand{\instituicaoC}{INSTITUTO MILITAR DE ENGENHARIA}
+\newcommand{\instituicaoD}{(Real Academia de Artilharia, Fortificação e Desenho -- 1792)}
+\newcommand{\secaoEnsino}{SEÇÃO DE ENSINO (SE/3) - ENGENHARIA DE COMUNICAÇÕES}
+\newcommand{\disciplina}{ARQUITETURA DE COMPUTADORES}
+\newcommand{\tituloTrabalho}{TRADUÇÃO DE ALGORITMOS DE MIPS ASM E LINGUAGEM C PARA EXCEL-16 ASM}
+\newcommand{\alunoRotulo}{ALUNO:}
+\newcommand{\alunoNome}{LUCAS MENDES \textbf{SANTIAGO} FILHO} % <- troque o nome aqui se necessário
+
+\begin{document}
+
+% --- Página de título ---
+\thispagestyle{empty}
+\begin{center}
+  {\Large \instituicaoA\par}
+  {\large \instituicaoB\par}
+  {\large \bfseries \instituicaoC\par}
+  {\small \instituicaoD\par}
+  \vspace{1.5cm}
+  {\large \secaoEnsino\par}
+  {\large \disciplina\par}
+  \vspace{3.2cm}
+  {\large \tituloTrabalho\par}
+  \vspace{6.0cm}
+  {\large \alunoRotulo\par}
+  \vspace{0.2cm}
+  {\Large \alunoNome\par}
+  \vfill
+  {\small 2026\par}
+\end{center}
+\newpage
+
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{Objetivo}
+% ============================================================
+
+O objetivo deste trabalho é traduzir dois algoritmos para a linguagem de montagem \textbf{Excel-ASM16}, utilizada pela CPU de 16 bits implementada inteiramente em planilha Excel (\emph{ExcelCPU}):
+
+\begin{enumerate}[itemsep=4pt]
+  \item \textbf{Exemplo 1} (\texttt{ex1.asm}) --- programa em MIPS Assembly que lê a largura e a altura de um retângulo, calcula sua área e imprime o resultado;
+  \item \textbf{Exemplo 2} (\texttt{ex2.c}) --- programa em linguagem C que converte um conjunto de pixels RGB (\emph{Red-Green-Blue}) em valores de tom de cinza.
+\end{enumerate}
+
+Assim como no trabalho anterior, não se trata de criar novas implementações, mas de realizar uma \textbf{tradução fiel} da lógica existente, respeitando o fluxo de cada programa original e adaptando-o às restrições da arquitetura de destino.
+
+% ============================================================
+\section{Ferramentas Utilizadas}
+% ============================================================
+
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\textwidth}{lX}
+  \toprule
+  \textbf{Ferramenta} & \textbf{Descrição} \\
+  \midrule
+  JsSpim & Simulador online MIPS32 --- utilizado para verificar o Exemplo 1 antes da tradução \\
+  \addlinespace
+  GCC & Compilador C --- utilizado para compilar e executar o Exemplo 2 original e obter as saídas de referência \\
+  \addlinespace
+  ExcelCPU & CPU de 16 bits implementada em Excel; inclui \texttt{CPU.xlsx}, \texttt{ROM.xlsx} e o compilador Python \\
+  \addlinespace
+  \texttt{compileExcelASM16.py} & Script Python que compila o arquivo \texttt{.s} e grava o programa no \texttt{ROM.xlsx} \\
+  \bottomrule
+\end{tabularx}
+\end{table}
+
+% ============================================================
+\section{Arquitetura do ExcelCPU (Excel-ASM16)}
+% ============================================================
+
+O ExcelCPU é uma CPU de \textbf{16 bits} implementada inteiramente em fórmulas do Microsoft Excel, com:
+
+\begin{itemize}[itemsep=2pt]
+  \item 16 registradores de uso geral (R0--R15);
+  \item RAM endereçada por 16 bits (cada posição armazena uma palavra de 16 bits);
+  \item display de 128$\times$128 pixels, mapeado em memória a partir do endereço \texttt{\$F000};
+  \item conjunto de instruções \textbf{Excel-ASM16} (24 instruções) e dois \emph{flags}: \emph{carry} (CF) e \emph{zero} (ZF).
+\end{itemize}
+
+Uma característica importante da arquitetura é que ela \textbf{não possui dispositivo de entrada por hardware} (não há teclado nem \texttt{stdin}). A entrada de dados é feita editando a planilha \texttt{ROM.xlsx} antes da execução; a saída é observada lendo as células de RAM da \texttt{CPU.xlsx} após a execução, ou desenhada no display.
+
+\subsection{Instruções Utilizadas Neste Trabalho}
+
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\textwidth}{llX}
+  \toprule
+  \textbf{Instrução} & \textbf{Exemplo} & \textbf{Descrição} \\
+  \midrule
+  \texttt{LOAD REG IMD} & \texttt{LOAD R1 \#4} & Carrega valor imediato (decimal ou hex) no registrador \\
+  \texttt{LOAD REG MEM} & \texttt{LOAD R1 WIDTH} & Carrega o conteúdo de um endereço fixo da RAM \\
+  \texttt{LOAD REG REG} & \texttt{LOAD R4 R3} & Carrega da RAM no endereço contido no 2\textordmasculine\ registrador (indireto) \\
+  \texttt{STORE REG REG} & \texttt{STORE R1 R0} & Escreve no endereço contido no 2\textordmasculine\ registrador \\
+  \texttt{TRAN REG REG} & \texttt{TRAN R5 R6} & Copia o valor de um registrador para outro \\
+  \texttt{INC REG} & \texttt{INC R1} & Incrementa em 1 (não afeta CF) \\
+  \texttt{MULT REG REG} & \texttt{MULT R1 R2} & Multiplica; parte baixa do produto em REGA, parte alta em REGB \\
+  \texttt{DIV REG REG} & \texttt{DIV R4 R0} & Divide REGA por REGB; quociente em REGA, resto em REGB \\
+  \texttt{ADD REG REG} & \texttt{ADD R4 R6} & Soma: REGA $+$ REGB $+$ CF, resultado em REGA \\
+  \texttt{AND REG REG} & \texttt{AND R4 R8} & E lógico bit a bit, resultado em REGA \\
+  \texttt{ROR REG IMD} & \texttt{ROR R6 \#8} & Rotação de bits à direita, IMD vezes \\
+  \texttt{CMP REG REG} & \texttt{CMP R4 R7} & Compara (subtrai) sem guardar o resultado; só afeta os flags \\
+  \texttt{CLC} & \texttt{CLC} & Zera o \emph{carry flag} (CF $= 0$) \\
+  \texttt{JEQ label} & \texttt{JEQ DONE} & Salta se ZF $= 1$ \\
+  \texttt{JMP label} & \texttt{JMP LOOP} & Salto incondicional \\
+  \bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{destaque}
+\textbf{Observação geral sobre o simulador.} Durante o desenvolvimento foram identificados dois comportamentos da CPU que afetam diretamente a tradução e que valem para ambos os exercícios:
+\begin{itemize}[itemsep=3pt]
+  \item As instruções aritméticas \texttt{ADD} e \texttt{SUB} \textbf{incluem o carry flag} na operação (\texttt{REGA $+$ REGB $+$ CF}). Por isso é necessário executar \texttt{CLC} antes de uma soma ``limpa''.
+  \item Carregar um valor imediato (\texttt{LOAD Rn \#x}) em um \textbf{registrador alto} (R8--R15) e utilizá-lo \emph{imediatamente} na instrução seguinte (como ponteiro de \texttt{STORE} ou operando de \texttt{DIV}) não funciona de forma confiável: o valor recém-carregado ainda não se propagou. O uso de \textbf{registradores baixos} (R0--R7) nesses casos resolve o problema.
+\end{itemize}
+\end{destaque}
+
+% ============================================================
+\section{Exemplo 1 --- Área de um Retângulo}
+% ============================================================
+
+\subsection{O Algoritmo Original e sua Verificação no JsSpim}
+
+O programa MIPS lê dois inteiros da entrada padrão (largura e altura), calcula a área como o produto dos dois e imprime o resultado. Antes da tradução, o arquivo \texttt{ex1.asm} foi carregado no simulador JsSpim para confirmar o comportamento esperado:
+
+\begin{destaque}
+  \textbf{Entrada:} \quad largura $= 5$, \quad altura $= 3$ \\[4pt]
+  \textbf{Saída:} \quad \texttt{Rectangle's area is 15}
+\end{destaque}
+
+\subsection{Código MIPS Original}
+
+\begin{lstlisting}[style=mips, caption={ex1.asm (trecho principal)}]
+main:
+    addi $v0, $0, 4       # syscall 4: imprime string (prompt da largura)
+    la   $a0, widthPrompt
+    syscall
+    addi $v0, $0, 5       # syscall 5: le inteiro
+    syscall
+    add  $8, $0, $v0      # $8 = largura
+
+    addi $v0, $0, 4       # prompt da altura
+    la   $a0, heightPrompt
+    syscall
+    addi $v0, $0, 5       # le inteiro
+    syscall
+    add  $9, $0, $v0      # $9 = altura
+
+    mult $8, $9           # multiplica largura * altura
+    mflo $10              # $10 = produto
+
+    addi $v0, $0, 4       # imprime "Rectangle's area is "
+    la   $a0, areaIs
+    syscall
+    addi $v0, $0, 1       # syscall 1: imprime inteiro
+    add  $a0, $0, $10
+    syscall
+\end{lstlisting}
+
+\subsection{Decisões de Tradução}
+
+\begin{itemize}[itemsep=4pt]
+  \item \textbf{Entrada de dados.} Como a Excel-16 não possui \texttt{stdin}, as \emph{syscalls} de leitura foram substituídas pela leitura de duas posições fixas da memória (\texttt{\$0002} e \texttt{\$0003}). Os valores de largura e altura são fornecidos pelo usuário editando a \texttt{ROM.xlsx} antes da execução --- o equivalente, nesta arquitetura, à ``entrada do usuário''.
+  \item \textbf{Saída de dados.} As \emph{syscalls} de impressão de texto foram removidas (a CPU não imprime strings). O resultado é gravado na memória, no endereço \texttt{\$0004}, e lido diretamente na planilha após a execução.
+  \item \textbf{Multiplicação.} O MIPS usa \texttt{mult} seguido de \texttt{mflo} para obter o produto. Na Excel-16, a instrução \texttt{MULT} já entrega o resultado de 32 bits diretamente em dois registradores: a parte baixa em REGA e a parte alta em REGB. Por isso, foram reservadas duas posições de saída (\texttt{\$0004} para a parte baixa e \texttt{\$0005} para a parte alta), cobrindo o caso em que o produto ultrapassa 16 bits.
+\end{itemize}
+
+\subsection{Desafio Encontrado: Gravação do Resultado}
+
+A primeira versão usava a instrução \texttt{STORE} com endereço absoluto (\texttt{STORE R1 @0004}). Após a execução, a posição de memória permanecia zerada, mesmo com o programa atingindo o fim corretamente. Investigando, constatou-se que:
+
+\begin{enumerate}[itemsep=4pt]
+  \item A variante \texttt{STORE REG MEM} (endereço absoluto) não atualizava a RAM de forma confiável neste simulador. A solução foi usar \texttt{STORE REG REG}, em que o endereço-destino fica em um registrador --- a mesma forma usada nos programas de exemplo do ExcelCPU.
+  \item Mesmo após essa correção, o resultado só passou a aparecer quando o ponteiro foi colocado em um \textbf{registrador baixo}. Carregar o endereço com \texttt{LOAD R10 \#4} (registrador alto) e usá-lo no \texttt{STORE} seguinte não funcionava: o valor não se propagava a tempo. Passando a usar \texttt{R0} como ponteiro, a gravação passou a ocorrer corretamente.
+\end{enumerate}
+
+\subsection{Mapeamento de Registradores e Memória}
+
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\textwidth}{llX}
+  \toprule
+  \textbf{MIPS} & \textbf{Excel-ASM16} & \textbf{Papel} \\
+  \midrule
+  \texttt{\$8} & R1 & Largura (lida de \texttt{\$0002}) \\
+  \texttt{\$9} & R2 & Altura (lida de \texttt{\$0003}); recebe a parte alta do produto \\
+  \texttt{\$10} & R1 & Parte baixa do produto (área) \\
+  --- & R0 & Ponteiro de gravação na memória \\
+  \bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{ccl}
+  \toprule
+  \textbf{Endereço} & \textbf{Variável} & \textbf{Conteúdo} \\
+  \midrule
+  \texttt{\$0002} & WIDTH  & largura (entrada) \\
+  \texttt{\$0003} & HEIGHT & altura (entrada) \\
+  \texttt{\$0004} & AREA   & área --- parte baixa (saída) \\
+  \texttt{\$0005} & AREAHI & área --- parte alta (saída) \\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Código Final Traduzido}
+
+\begin{lstlisting}[style=asm, caption={ex1.s --- versão final em Excel-ASM16}]
+.DATA
+WIDTH = #0     ; $0002 - entrada
+HEIGHT = #0    ; $0003 - entrada
+AREA = #0      ; $0004 - saida (parte baixa)
+AREAHI = #0    ; $0005 - saida (parte alta, se passar de 65535)
+
+.CODE
+LOAD R1 WIDTH
+LOAD R2 HEIGHT
+
+; area = largura * altura
+CLC              ; zera o carry antes (ADD/MULT levam o carry em conta)
+MULT R1 R2       ; R1 = parte baixa, R2 = parte alta (R2 e sobrescrito)
+
+; grava o resultado (R0 e baixo de proposito - ver secao de desafios)
+LOAD R0 #4
+STORE R1 R0      ; $0004 = area
+LOAD R0 #5
+STORE R2 R0      ; $0005 = parte alta
+
+; nao existe HALT, entao travo num loop pra terminar
+END:
+JMP END
+\end{lstlisting}
+
+O programa compila em \textbf{20 palavras}. Após a execução, o contador de programa (PC) fica travado no endereço 17 (\texttt{END}).
+
+\subsection{Resultado}
+
+\begin{destaque}
+  \textbf{Entrada (na ROM):} \quad largura $= 5$, \quad altura $= 3$ \\[6pt]
+  \textbf{Saída (em \texttt{\$0004}):} \quad \texttt{15}
+\end{destaque}
+
+O resultado coincide com a saída do simulador MIPS. O programa também foi verificado com outros valores --- por exemplo, $10 \times 10 = 100$ --- e, no caso de produtos maiores que 16 bits (como $1000 \times 1000 = 1\,000\,000$), as partes baixa (\texttt{\$0004}) e alta (\texttt{\$0005}) juntas reproduzem o valor de 32 bits, exatamente como o par \texttt{mflo}/\texttt{mfhi} faria no MIPS.
+
+% ============================================================
+\section{Exemplo 2 --- Conversão RGB para Tons de Cinza}
+% ============================================================
+
+\subsection{O Algoritmo Original (C)}
+
+O programa em C percorre um vetor de pixels de 24 bits (formato \texttt{0xRRGGBB}) até encontrar o valor sentinela \texttt{-1}. Para cada pixel, extrai os canais vermelho, verde e azul por meio de deslocamentos e máscaras, calcula a média \texttt{(R + G + B) / 3} e imprime o tom de cinza resultante.
+
+\begin{lstlisting}[style=c, caption={ex2.c}]
+int pixels[] = {0x00010000, 0x010101, 0x6, 0x3333,
+                0x030c, 0x700853, 0x294999, -1};
+
+int rgb_to_gray(int red, int green, int blue) {
+    return (red + green + blue) / 3;
+}
+
+int main() {
+    int i = 0, rgb, red, green, blue, gray;
+    printf("Converting pixels to grayscale:\n");
+    while (pixels[i] != -1) {
+        rgb   = pixels[i];
+        blue  =  rgb        & 0xff;
+        green = (rgb >> 8)  & 0xff;
+        red   = (rgb >> 16) & 0xff;
+        gray  = rgb_to_gray(red, green, blue);
+        printf("%d\n", gray);
+        i++;
+    }
+    printf("Finished.\n");
+}
+\end{lstlisting}
+
+Compilado e executado em um PC, o programa produz a sequência de tons de cinza usada como referência: \texttt{0, 1, 2, 34, 5, 67, 89}.
+
+\subsection{Decisões de Tradução}
+
+\begin{itemize}[itemsep=4pt]
+  \item \textbf{Pixels de 24 bits em uma CPU de 16 bits.} Cada pixel \texttt{0xRRGGBB} não cabe em uma única palavra de 16 bits. A solução foi armazenar cada pixel em \textbf{duas palavras consecutivas}: a primeira contém apenas o vermelho (\texttt{\$00RR}) e a segunda contém o verde e o azul juntos (\texttt{\$GGBB}). É o equivalente a separar o número em parte alta e parte baixa.
+  \item \textbf{Sentinela.} O valor \texttt{-1} que encerra o laço em C foi representado por \texttt{\$FFFF} na palavra alta do ``pixel'' final. Como um pixel válido nunca ultrapassa \texttt{\$00FF} na palavra alta, não há ambiguidade.
+  \item \textbf{Extração dos canais.} A Excel-16 não possui deslocamento lógico (\texttt{>>}). Para obter o verde (\texttt{(rgb >> 8) \& 0xff}), foi usada a instrução \texttt{ROR} (rotação à direita de 8 bits) seguida de \texttt{AND} com a máscara \texttt{\$00FF}, que limpa os bits que retornaram pelo topo na rotação.
+  \item \textbf{Soma e divisão.} A soma \texttt{R + G + B} usa \texttt{ADD} (com \texttt{CLC} antes, como discutido na Seção 3); a média usa a instrução \texttt{DIV}. Como \texttt{DIV} deixa o resto no segundo operando, o divisor (3) é recarregado a cada iteração. Seguindo a mesma lição do Exemplo 1, o divisor foi colocado em \texttt{R0} (registrador baixo) para que o valor esteja disponível na \texttt{DIV} seguinte.
+  \item \textbf{Saída.} O \texttt{printf} foi substituído pela gravação dos sete tons de cinza em posições consecutivas da RAM (a partir de \texttt{\$0100}) e, adicionalmente, no display (a partir de \texttt{\$F000}), produzindo uma saída visual.
+\end{itemize}
+
+\subsection{Mapeamento de Registradores e Layout de Memória}
+
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\textwidth}{lX}
+  \toprule
+  \textbf{Registrador} & \textbf{Papel} \\
+  \midrule
+  R0 & Divisor (valor 3), recarregado a cada iteração \\
+  R1 & Ponteiro de leitura no vetor de pixels \\
+  R2 & Ponteiro de escrita dos resultados na RAM (\texttt{\$0100}+) \\
+  R3 & Ponteiro de escrita no display (\texttt{\$F000}+) \\
+  R4 & Vermelho $\rightarrow$ soma $\rightarrow$ tom de cinza \\
+  R5 & Azul \\
+  R6 & Verde \\
+  R7 & Sentinela (\texttt{\$FFFF}), para comparação \\
+  R8 & Máscara de um byte (\texttt{\$00FF}) \\
+  \bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{ccccc}
+  \toprule
+  \textbf{Pixel} & \textbf{0xRRGGBB} & \textbf{R} & \textbf{G} & \textbf{B} \\
+  \midrule
+  0 & 0x00010000 & 1   & 0  & 0   \\
+  1 & 0x00010101 & 1   & 1  & 1   \\
+  2 & 0x00000006 & 0   & 0  & 6   \\
+  3 & 0x00003333 & 0   & 51 & 51  \\
+  4 & 0x0000030C & 0   & 3  & 12  \\
+  5 & 0x00700853 & 112 & 8  & 83  \\
+  6 & 0x00294999 & 41  & 73 & 153 \\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Código Final Traduzido}
+
+\begin{lstlisting}[style=asm, caption={ex2.s --- versão final em Excel-ASM16}]
+.DATA
+; cada pixel = 2 palavras (parte alta = R, parte baixa = GB)
+P0HI = $0001     ; 0x00010000  R=1  G=0  B=0
+P0LO = $0000
+P1HI = $0001     ; 0x00010101  R=1  G=1  B=1
+P1LO = $0101
+P2HI = $0000     ; 0x00000006  R=0  G=0  B=6
+P2LO = $0006
+P3HI = $0000     ; 0x00003333  R=0  G=51 B=51
+P3LO = $3333
+P4HI = $0000     ; 0x0000030C  R=0  G=3  B=12
+P4LO = $030C
+P5HI = $0070     ; 0x00700853  R=112 G=8 B=83
+P5LO = $0853
+P6HI = $0029     ; 0x00294999  R=41 G=73 B=153
+P6LO = $4999
+SENT = $FFFF     ; marca o fim do array (o -1 do C)
+
+.CODE
+; ponteiros e constantes
+LOAD R1 $0002    ; comeco do array
+LOAD R2 $0100    ; onde vou gravar os resultados
+LOAD R3 $F000    ; display
+LOAD R7 $FFFF    ; sentinela pra comparar
+LOAD R8 $00FF    ; mascara de 1 byte
+
+LOOP:
+LOAD R4 R1       ; le a parte alta do pixel
+CMP R4 R7        ; chegou no $FFFF?
+JEQ DONE         ; entao acabou
+
+INC R1
+LOAD R5 R1       ; le a parte baixa ($GGBB)
+INC R1           ; ja deixa apontando pro proximo pixel
+
+; separa R, G, B
+AND R4 R8        ; R = parte alta & 0xFF
+
+TRAN R5 R6       ; copia $GGBB
+ROR R6 #8        ; gira 8 bits pra trocar os bytes
+AND R6 R8        ; G = byte que sobrou
+
+AND R5 R8        ; B = parte baixa & 0xFF
+
+; soma = R + G + B  (no maximo 765, cabe em 16 bits)
+CLC              ; ADD soma o carry junto, entao zero ele antes
+ADD R4 R6
+CLC
+ADD R4 R5
+
+; gray = soma / 3  (divisor em R0, registrador baixo)
+LOAD R0 #3
+DIV R4 R0        ; R4 = soma/3 (o resto vai pro R0 e eu ignoro)
+
+; grava o cinza na RAM e no display
+STORE R4 R2
+INC R2
+STORE R4 R3
+INC R3
+
+JMP LOOP
+
+DONE:
+JMP DONE
+\end{lstlisting}
+
+O programa compila em \textbf{54 palavras}. Após a execução, o PC fica travado no endereço 52 (\texttt{DONE}).
+
+\subsection{Resultado}
+
+Os sete tons de cinza são gravados nas posições \texttt{\$0100}--\texttt{\$0106} da RAM:
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{ccl}
+  \toprule
+  \textbf{Pixel} & \textbf{Cálculo} & \textbf{Tom de cinza} \\
+  \midrule
+  0 & $(1 + 0 + 0)/3$       & 0  \\
+  1 & $(1 + 1 + 1)/3$       & 1  \\
+  2 & $(0 + 0 + 6)/3$       & 2  \\
+  3 & $(0 + 51 + 51)/3$     & 34 \\
+  4 & $(0 + 3 + 12)/3$      & 5  \\
+  5 & $(112 + 8 + 83)/3$    & 67 \\
+  6 & $(41 + 73 + 153)/3$   & 89 \\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+\begin{destaque}
+  \textbf{Saída do ExcelCPU:} \quad \texttt{0, 1, 2, 34, 5, 67, 89} \\[4pt]
+  \textbf{Saída do programa em C:} \quad \texttt{0, 1, 2, 34, 5, 67, 89}
+\end{destaque}
+
+As duas saídas são idênticas, confirmando a correção da tradução.
+
+% ============================================================
+\section{Compilação e Execução}
+% ============================================================
+
+\begin{enumerate}[itemsep=4pt]
+  \item Compilar o programa desejado via terminal:
+    \begin{lstlisting}[style=asm, numbers=none]
+py compileExcelASM16.py ex1.s ROM.xlsx
+py compileExcelASM16.py ex2.s ROM.xlsx
+    \end{lstlisting}
+
+  \item Abrir \texttt{ROM.xlsx} e \texttt{CPU.xlsx} no Microsoft Excel.
+
+  \item Verificar que o \emph{Iterative Calculation} está ativo (\texttt{File > Options > Formulas > Enable Iterative Calculation}, com \texttt{Maximum Iterations = 1}).
+
+  \item (Apenas para o Exemplo 1) Editar na \texttt{ROM.xlsx} as células correspondentes a \texttt{\$0002} (largura) e \texttt{\$0003} (altura).
+
+  \item Clicar no botão \textbf{Read ROM} para carregar o programa na RAM e, em seguida, no botão \textbf{Reset} para posicionar o PC em 0.
+
+  \item Executar pressionando \textbf{F9} repetidamente (cada pressionamento avança um ciclo de clock), aguardando o texto ``Ready'' entre as repetições. O Exemplo 1 conclui em algumas dezenas de ciclos; o Exemplo 2, por conter um laço de sete iterações, requer várias centenas.
+
+  \item Ler os resultados na RAM: \texttt{\$0004} para o Exemplo 1; \texttt{\$0100}--\texttt{\$0106} para o Exemplo 2.
+\end{enumerate}
+
+% ============================================================
+\section{Conclusão}
+% ============================================================
+
+A tradução dos dois algoritmos para Excel-ASM16 exigiu, além da correspondência direta entre instruções, a compreensão de particularidades da arquitetura do ExcelCPU que vão além da documentação. Os principais aprendizados foram:
+
+\begin{itemize}[itemsep=4pt]
+  \item \textbf{Ausência de I/O por hardware.} A CPU não possui entrada de dados em tempo de execução. A ``interação do usuário'' do Exemplo 1 foi feita preparando os dados na ROM antes da execução, e a saída de texto foi substituída pela leitura direta da memória --- adaptações necessárias para preservar a lógica dos programas originais.
+
+  \item \textbf{O carry flag nas operações aritméticas.} As instruções \texttt{ADD} e \texttt{SUB} incorporam o carry flag. Foi necessário usar \texttt{CLC} antes de cada soma para evitar que resíduos de operações anteriores corrompessem o resultado.
+
+  \item \textbf{Propagação em registradores altos.} Carregar um valor imediato em um registrador alto (R8--R15) e utilizá-lo na instrução seguinte não funciona de forma confiável no simulador. A solução, aplicada nos dois exercícios, foi usar registradores baixos (R0--R7) para ponteiros e divisores recém-carregados.
+
+  \item \textbf{Representação de dados maiores que a palavra.} Tanto o produto de 32 bits do Exemplo 1 quanto os pixels de 24 bits do Exemplo 2 não cabem em uma palavra de 16 bits. Em ambos os casos, a solução foi dividir o dado em duas palavras (parte alta e parte baixa), tratando-as separadamente.
+
+  \item \textbf{Suprir instruções ausentes.} A falta de deslocamento lógico foi contornada combinando rotação (\texttt{ROR}) com máscara (\texttt{AND}), demonstrando como operações de alto nível em C podem ser reconstruídas a partir de um conjunto de instruções reduzido.
+\end{itemize}
+
+Os dois programas finais --- de 20 e 54 palavras, respectivamente --- reproduzem fielmente as saídas dos originais em MIPS e em C, cumprindo o objetivo de tradução proposto.
+
+\end{document}
