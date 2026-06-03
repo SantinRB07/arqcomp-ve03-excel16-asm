@@ -33,12 +33,8 @@ VE03/
 │   ├── run-clock.ps1          Script p/ automatizar os ciclos de clock (F9)
 │   ├── LICENSE
 │   └── samples/               Programas de exemplo do upstream
-├── docs/               Documentação e relatório
-│   ├── excel-asm16-ref.md      Referência da linguagem (ISA, sintaxe, I/O)
-│   ├── ex1-modo-manual.md      Entrada do usuário via modo manual (ex1)
-│   ├── roteiro-video-ex1.md    Roteiro de gravação do ex1
-│   ├── roteiro-video-ex2.md    Roteiro de gravação do ex2
-│   └── Relatorio-VE03.pdf      Relatório descritivo (entregável)
+├── docs/               Relatório descritivo (entregável)
+│   └── Relatorio-VE03.pdf
 └── media/              Vídeos das simulações (entregáveis)
     ├── ex1-simulacao.mp4
     └── ex2-simulacao.mp4
@@ -85,23 +81,13 @@ python tools\compileExcelASM16.py src\ex2.s build\ROM-ex2.xlsx
    ```
 
 > ⚠ **Entrada de dados**: edite os valores na **`ROM.xlsx`** (nunca nas células
-> de RAM da `CPU.xlsx`, que contêm fórmulas). Veja os detalhes e o mapa de
-> células em [docs/excel-asm16-ref.md](docs/excel-asm16-ref.md).
+> de RAM da `CPU.xlsx`, que contêm fórmulas).
 
 ### Onde ver os resultados (na CPU.xlsx)
 
 - **ex1**: célula `E140` = área do retângulo (`$0004`).
 - **ex2**: células `A141`–`G141` = os 7 valores de cinza (`$0100`–`$0106`);
   mesmos valores no display em `A380`–`G380` (`$F000`+).
-
-## Documentação
-
-- [docs/excel-asm16-ref.md](docs/excel-asm16-ref.md) — referência completa da
-  linguagem Excel-ASM16 (instruction set, sintaxe, I/O e pegadinhas do simulador).
-- [docs/ex1-modo-manual.md](docs/ex1-modo-manual.md) — como inserir os dados via
-  modo manual da CPU (alternativa à edição da ROM).
-- [docs/roteiro-video-ex1.md](docs/roteiro-video-ex1.md) e
-  [docs/roteiro-video-ex2.md](docs/roteiro-video-ex2.md) — roteiros das gravações.
 
 ## Referências
 
